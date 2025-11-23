@@ -114,7 +114,7 @@ Creato con ❤️ usando Pygame Zero
 
 ## 🔗 Link utili
 
-- [Learning Python With Games]([https://pygame-zero.readthedocs.io/](https://github.com/PythonBiellaGroup/LearningPythonWithGames/)
+- [Learning Python With Games by Python Biella Group](https://github.com/PythonBiellaGroup/LearningPythonWithGames/)
 - [Pygame Zero Documentation](https://pygame-zero.readthedocs.io/)
 - [Python Official Site](https://www.python.org/)
 
