@@ -33,7 +33,8 @@ Porta la rana dalla parte inferiore dello schermo fino alla zona verde in alto, 
 
 ### Requisiti
 - Python 3.x
-- Pygame Zero
+- Pygame Zero (per la versione standard)
+- Pygame (per la versione Batocera)
 
 ### Installazione dipendenze
 
@@ -42,6 +43,8 @@ pip install pgzero
 ```
 
 ### Avvio del gioco
+
+**Versione Pygame Zero (standard):**
 
 ```bash
 python frogger.py
@@ -52,6 +55,14 @@ oppure
 ```bash
 pgzrun frogger.py
 ```
+
+**Versione Pygame (per Batocera):**
+
+Sono stati aggiunti i seguenti file per l'esecuzione su Batocera:
+- `frogger.pygame` - Versione implementata con Pygame puro
+- `frogger.pygame.keys` - File di configurazione dei tasti per Batocera
+
+Per utilizzare il gioco su Batocera, copia i file nella cartella delle ROM di Pygame del tuo sistema Batocera. Per maggiori dettagli sull'installazione e configurazione, consulta la [documentazione ufficiale di Batocera](https://wiki.batocera.org/systems:pygame).
 
 ### Asset grafici necessari
 
@@ -71,6 +82,7 @@ Il gioco richiede le seguenti immagini nella cartella `images/`:
 - **Effetti visivi**: Animazione di salto e lampeggio alla morte
 - **6 righe di traffico**: Macchine che si muovono in direzioni alternate
 - **5 righe di fiume**: Tronchi galleggianti su cui saltare
+- **Compatibilità Batocera**: Versione ottimizzata per piattaforme retrogaming
 
 ## 🛠️ Dettagli tecnici
 
@@ -116,6 +128,7 @@ Creato con ❤️ usando Pygame Zero
 
 - [Learning Python With Games by Python Biella Group](https://github.com/PythonBiellaGroup/LearningPythonWithGames/)
 - [Pygame Zero Documentation](https://pygame-zero.readthedocs.io/)
+- [Batocera Documentation](https://wiki.batocera.org/)
 - [Python Official Site](https://www.python.org/)
 
 ---
