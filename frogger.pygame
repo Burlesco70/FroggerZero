@@ -1,0 +1,260 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import pygame
+import sys
+import os
+
+# === INIZIALIZZAZIONE PYGAME ===
+pygame.init()
+
+# Costanti
+WIDTH = 800
+HEIGHT = 600
+FPS = 60
+TITLE = "Frogger Zero"
+
+# Colori
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+
+# Crea la finestra
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption(TITLE)
+clock = pygame.time.Clock()
+
+# === CARICAMENTO IMMAGINI ===
+def load_image(name):
+    """Carica un'immagine dalla cartella images/"""
+    path = os.path.join('images', f'{name}.png')
+    try:
+        image = pygame.image.load(path).convert_alpha()
+        return image
+    except pygame.error as e:
+        print(f"Impossibile caricare l'immagine: {path}")
+        print(f"Errore: {e}")
+        surf = pygame.Surface((40, 40))
+        surf.fill((255, 0, 255))
+        return surf
+
+# Carica tutte le immagini
+images = {
+    'background': load_image('background'),
+    'frog1': load_image('frog1'),
+    'frog2': load_image('frog2'),
+}
+
+for i in range(1, 7):
+    images[f'car{i}'] = load_image(f'car{i}')
+
+for i in range(1, 6):
+    images[f'float{i}'] = load_image(f'float{i}')
+
+# === CLASSE SPRITE ===
+class Sprite:
+    def __init__(self, image_name, x, y):
+        self.image_name = image_name
+        self.image = images[image_name]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.angle = 0
+        
+    @property
+    def x(self):
+        return self.rect.centerx
+    
+    @x.setter
+    def x(self, value):
+        self.rect.centerx = value
+    
+    @property
+    def y(self):
+        return self.rect.centery
+    
+    @y.setter
+    def y(self, value):
+        self.rect.centery = value
+    
+    def draw(self, surface):
+        if self.angle != 0:
+            rotated = pygame.transform.rotate(self.image, self.angle)
+            rotated_rect = rotated.get_rect(center=self.rect.center)
+            surface.blit(rotated, rotated_rect)
+        else:
+            surface.blit(self.image, self.rect)
+    
+    def colliderect(self, other):
+        return self.rect.colliderect(other.rect)
+
+# === VARIABILI ===
+game_state = 0
+frame_count = 0
+lives = 3
+score = 0
+move_cooldown = 0
+MOVE_DELAY = 10
+
+# === SPRITE ===
+frog = Sprite('frog1', 400, 580)
+frog.direction = 0
+frog.delay = 0
+frog.on_board = -1
+
+cars = []
+floats = []
+
+for row in range(0, 6):
+    for col in range(0, 4):
+        car = Sprite(f'car{row+1}', 
+                    (row*20)+(col*(240-(row*10))), 
+                    540-(row*40))
+        cars.append(car)
+        
+        if row < 5:
+            float_sprite = Sprite(f'float{row+1}', 
+                                 (row*20)+(col*(240-(row*10))), 
+                                 260-(row*40))
+            floats.append(float_sprite)
+
+font = pygame.font.Font(None, 36)
+font_large = pygame.font.Font(None, 72)
+
+# === FUNZIONI ===
+def move_frog(delta_x, delta_y, direction):
+    global move_cooldown
+    if 0 < frog.x + delta_x < WIDTH:
+        frog.x += delta_x
+    if 0 < frog.y + delta_y < HEIGHT:
+        frog.y += delta_y
+    
+    frog.image = images['frog2']
+    frog.delay = 1
+    frog.direction = direction
+    move_cooldown = MOVE_DELAY
+
+def reset_frog():
+    global frame_count
+    frog.rect.center = (400, 580)
+    frog.direction = 0
+    frog.delay = 0
+    frog.on_board = -1
+    frog.image = images['frog1']
+    frog.angle = 0
+    frame_count = 0
+
+def draw_text(text, x, y, font_obj=font, color=WHITE, center=False):
+    text_surface = font_obj.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    if center:
+        text_rect.center = (x, y)
+    else:
+        text_rect.topleft = (x, y)
+    screen.blit(text_surface, text_rect)
+
+# === MAIN LOOP ===
+running = True
+while running:
+    clock.tick(FPS)
+    
+    keys = pygame.key.get_pressed()
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        
+        elif event.type == pygame.KEYDOWN:
+            if game_state == 0 and move_cooldown == 0:
+                if event.key == pygame.K_UP:
+                    move_frog(0, -40, 0)
+                elif event.key == pygame.K_DOWN:
+                    move_frog(0, 40, 180)
+                elif event.key == pygame.K_LEFT:
+                    move_frog(-40, 0, 90)
+                elif event.key == pygame.K_RIGHT:
+                    move_frog(40, 0, 270)
+            elif game_state == 2 and event.key == pygame.K_SPACE:
+                lives = 3
+                score = 0
+                reset_frog()
+                game_state = 0
+    
+    if move_cooldown > 0:
+        move_cooldown -= 1
+    
+    # === LOGICA GIOCO ===
+    if game_state == 0:
+        frog.on_board = -1
+        
+        if frog.y < 80:
+            score += 100
+            reset_frog()
+        else:
+            for row in range(0, 6):
+                speed = -1 if row % 2 == 1 else 1
+                
+                for col in range(0, 4):
+                    index = (row * 4) + col
+                    
+                    cars[index].x += speed
+                    if cars[index].x > WIDTH + 40:
+                        cars[index].x = -40
+                    if cars[index].x < -40:
+                        cars[index].x = WIDTH + 40
+                    
+                    if cars[index].colliderect(frog):
+                        game_state = 1
+                    
+                    if row < 5:
+                        floats[index].x -= speed
+                        if floats[index].x > WIDTH + 80:
+                            floats[index].x = -80
+                        if floats[index].x < -80:
+                            floats[index].x = WIDTH + 80
+                        
+                        if floats[index].colliderect(frog):
+                            frog.on_board = index
+                            frog.x -= speed
+            
+            if frog.delay > 0:
+                frog.delay += 1
+                if frog.delay > 10:
+                    frog.image = images['frog1']
+                    frog.angle = frog.direction
+            
+            if 60 < frog.y < 270 and frog.on_board == -1:
+                game_state = 1
+    
+    elif game_state == 1:
+        if frame_count > 30:
+            lives -= 1
+            if lives > 0:
+                reset_frog()
+                game_state = 0
+            else:
+                game_state = 2
+    
+    # === DISEGNO ===
+    screen.blit(images['background'], (0, 0))
+    
+    for float_sprite in floats:
+        float_sprite.draw(screen)
+    
+    if game_state == 0 or (game_state == 1 and frame_count % 2 == 0):
+        frog.draw(screen)
+    
+    for car in cars:
+        car.draw(screen)
+    
+    draw_text(f"Vite: {lives}", 20, 20)
+    draw_text(f"Punteggio: {score}", 600, 20)
+    
+    if game_state == 2:
+        draw_text("GAME OVER", WIDTH//2, 300, font_large, RED, center=True)
+        draw_text(f"Punteggio finale: {score}", WIDTH//2, 350, font, WHITE, center=True)
+        draw_text("SPAZIO per ricominciare", WIDTH//2, 400, font, WHITE, center=True)
+    
+    pygame.display.flip()
+    frame_count += 1
+
+pygame.quit()
+sys.exit()

@@ -1,0 +1,49 @@
+{
+    "actions_player1": [
+        {
+            "trigger": [
+                "dpad_up"
+            ],
+            "type": "key",
+            "target": [
+                "KEY_DOWN"
+            ]
+        },
+        {
+            "trigger": [
+                "dpad_down"
+            ],
+            "type": "key",
+            "target": [
+                "KEY_UP"
+            ]
+        },
+        {
+            "trigger": [
+                "dpad_left"
+            ],
+            "type": "key",
+            "target": [
+                "KEY_LEFT"
+            ]
+        },
+        {
+            "trigger": [
+                "dpad_right"
+            ],
+            "type": "key",
+            "target": [
+                "KEY_RIGHT"
+            ]
+        },
+        {
+            "trigger": [
+                "start"
+            ],
+            "type": "key",
+            "target": [
+                "KEY_ENTER"
+            ]
+        }
+    ]
+}
